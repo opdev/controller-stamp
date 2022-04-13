@@ -23,7 +23,6 @@ import (
 
 	"github.com/imdario/mergo"
 	{{ .Primary.APIImportAlias }} "{{ .Primary.APIImportPath }}"
-	subrec "github.com/opdev/subreconciler"
 	{{ .Secondary.APIImportAlias }} "{{ .Secondary.APIImportPath }}"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -57,11 +56,11 @@ func (r *{{ .Primary.Kind }}{{ .Secondary.Kind }}Reconciler) Reconcile(ctx conte
 	err := r.Client.Get(ctx, instanceKey, &instance)
 
 	if apierrors.IsNotFound(err) {
-		return &ctrl.Result{Requeue: false}, nil
+		return ctrl.Result{Requeue: false}, nil
 	}
 
 	if err != nil {
-		return &ctrl.Result{Requeue: true}, err
+		return ctrl.Result{Requeue: true}, err
 	}
 
 	new := {{ .Secondary.APIImportAlias }}.{{ .Secondary.Kind }}{
@@ -70,7 +69,7 @@ func (r *{{ .Primary.Kind }}{{ .Secondary.Kind }}Reconciler) Reconcile(ctx conte
 
 	err = ctrl.SetControllerReference(&instance, &new, r.Scheme)
 	if err != nil {
-		return &ctrl.Result{Requeue: true}, err
+		return ctrl.Result{Requeue: true}, err
 	}
 
 	// If the {{ .Secondary.KindLower }} exists, get it and patch it
@@ -81,25 +80,25 @@ func (r *{{ .Primary.Kind }}{{ .Secondary.Kind }}Reconciler) Reconcile(ctx conte
 		// create the resource because it does not exist.
 		l.Info("creating resource", new.Kind, new.Name)
 		if err := r.Client.Create(ctx, &new); err != nil {
-			return &ctrl.Result{Requeue: true}, err
+			return ctrl.Result{Requeue: true}, err
 		}
 	}
 
 	if err != nil {
-		return &ctrl.Result{Requeue: true}, err
+		return ctrl.Result{Requeue: true}, err
 	}
 
 	l.Info("updating resources if necessary", existing.Kind, existing.GetName())
 	patchDiff := client.MergeFrom(&existing)
 	if err = mergo.Merge(&existing, new, mergo.WithOverride); err != nil {
-		return &ctrl.Result{Requeue: true}, err
+		return ctrl.Result{Requeue: true}, err
 	}
 
 	if err = r.Patch(ctx, &existing, patchDiff); err != nil {
-		return &ctrl.Result{Requeue: true}, err
+		return ctrl.Result{Requeue: true}, err
 	}
 
-	return &ctrl.Result{Requeue: false}, nil // success
+	return ctrl.Result{Requeue: false}, nil // success
 }
 
 // SetupWithManager sets up the controller with the Manager.

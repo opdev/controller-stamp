@@ -24,7 +24,6 @@ import (
 
 func Get(resource string) (template.ResourceData, error) {
 	switch resource {
-
 	case "deployment", "deploy":
 		return deployment, nil
 	case "pod", "po":
@@ -36,7 +35,7 @@ func Get(resource string) (template.ResourceData, error) {
 	case "persistentvolumeclaim", "pvc":
 		return pvc, nil
 	default:
-		return template.ResourceData{}, fmt.Errorf(
+		return pod, fmt.Errorf(
 			"woah there! I've got no clue what a \"%s\" resource is, pal",
 			resource,
 		)
@@ -53,7 +52,7 @@ var deployment = template.ResourceData{
 }
 
 var pod = template.ResourceData{
-	APIImportPath:  "k8s.io/api/v1",
+	APIImportPath:  "k8s.io/api/core/v1",
 	APIImportAlias: "corev1",
 	APIGroup:       "core",
 	Kind:           "Pod",
@@ -62,7 +61,7 @@ var pod = template.ResourceData{
 }
 
 var secret = template.ResourceData{
-	APIImportPath:  "k8s.io/api/v1",
+	APIImportPath:  "k8s.io/api/core/v1",
 	APIImportAlias: "corev1",
 	APIGroup:       "core",
 	Kind:           "Secret",
@@ -71,7 +70,7 @@ var secret = template.ResourceData{
 }
 
 var configmap = template.ResourceData{
-	APIImportPath:  "k8s.io/api/v1",
+	APIImportPath:  "k8s.io/api/core/v1",
 	APIImportAlias: "corev1",
 	APIGroup:       "core",
 	Kind:           "ConfigMap",
@@ -80,7 +79,7 @@ var configmap = template.ResourceData{
 }
 
 var pvc = template.ResourceData{
-	APIImportPath:  "k8s.io/api/v1",
+	APIImportPath:  "k8s.io/api/core/v1",
 	APIImportAlias: "corev1",
 	APIGroup:       "core",
 	Kind:           "PersistentVolumeClaim",

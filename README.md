@@ -7,8 +7,10 @@ The idea is that bootstrapping reconciliation for secondary resources should be
 quick. Go-based operators should have a starting point that isn't "an empty
 reconcile func".
 
-This PoC is minimal, and just prints a hard-coded Deployment reconciler for a
-fictional primary resource.
+A full list of supported secondary resources can be found [here](resource/resource.go).
+
+A full list of supported templates can be found [here](template/template.go).
+
 
 It is up to the developer to fill in their secondary resource spec as a function
 of their primary resource's spec, and setup the controller with the manager.

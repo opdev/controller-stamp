@@ -18,35 +18,36 @@ package cmd
 
 import (
 	"fmt"
+	"html/template"
 	"log"
 	"os"
-	"text/template"
 
 	"github.com/opdev/controller-stamp/resource"
 	ct "github.com/opdev/controller-stamp/template"
 )
 
-// Execute is the primary entrypoint.
-func Execute() int {
-	secondary, err := resource.Get("depsloment")
+// ExecuteFn is the primary entrypoint.
+func ExecuteFn(userResource ct.ResourceData, userTmplSel, userSecondarySel string) int {
+	secondary, err := resource.Get(userSecondarySel)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "ERR %s: %s", err, "falling back to a pod as the secondary resource.")
-		secondary, _ = resource.Get("pod")
+		fmt.Fprintln(os.Stderr, err)
+		return 1
+	}
+
+	tpl, err := ct.Get(userTmplSel)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		return 2
 	}
 
 	i := ct.Input{
-		Primary: ct.ResourceData{
-			APIImportAlias: "demooperatorv1alpha1",
-			APIImportPath:  "example.com/demo-operator/api/v1alpha1",
-			APIGroup:       "demo.example.com",
-			Kind:           "MyCustomResource",
-		},
+		Primary:   userResource,
 		Secondary: secondary,
 	}
 
 	i.Introspect()
 
-	toRender, err := template.New("controller").Parse(ct.StandardController)
+	toRender, err := template.New("controller").Parse(tpl)
 	if err != nil {
 		log.Println("bah!")
 		log.Fatal(err)
