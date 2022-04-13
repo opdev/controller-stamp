@@ -46,7 +46,7 @@ func Execute() int {
 
 	i.Introspect()
 
-	toRender, err := template.New("controller").Parse(ct.StandardControllerTemplate)
+	toRender, err := template.New("controller").Parse(ct.StandardController)
 	if err != nil {
 		log.Println("bah!")
 		log.Fatal(err)
