@@ -22,9 +22,9 @@ import (
 	"context"
 
 	"github.com/imdario/mergo"
-	{{ .CRDAPIImportAlias }} "{{ .CRDAPIImportPath }}"
+	{{ .Primary.APIImportAlias }} "{{ .Primary.APIImportPath }}"
 	subrec "github.com/opdev/subreconciler"
-	{{ .SecondaryAPIImportAlias }} "{{ .SecondaryAPIImportPath }}"
+	{{ .Secondary.APIImportAlias }} "{{ .Secondary.APIImportPath }}"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -32,28 +32,28 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
-// {{ .CRDKind }}{{ .SecondaryKind }}Reconciler reconciles the deployment resource.
-type {{ .CRDKind }}{{ .SecondaryKind }}Reconciler struct {
+// {{ .Primary.Kind }}{{ .Secondary.Kind }}Reconciler reconciles the deployment resource.
+type {{ .Primary.Kind }}{{ .Secondary.Kind }}Reconciler struct {
 	client.Client
 	Scheme *runtime.Scheme
 }
 
-//+kubebuilder:rbac:groups={{ .CRDAPIGroup }},resources={{ .CRDResourcePlural }},verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups={{ .CRDAPIGroup }},resources={{ .CRDResourcePlural }}/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups={{ .CRDAPIGroup }},resources={{ .CRDResourcePlural }}/finalizers,verbs=update
-//+kubebuilder:rbac:groups={{ .SecondaryResourceAPIGroup }},resources={{ .SecondaryResourcePlural }},verbs=get;update;patch
-//+kubebuilder:rbac:groups={{ .SecondaryResourceAPIGroup }},resources={{ .SecondaryResourcePlural }}/finalizers,verbs=update
+//+kubebuilder:rbac:groups={{ .Primary.APIGroup }},resources={{ .Primary.KindPlural }},verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups={{ .Primary.APIGroup }},resources={{ .Primary.KindPlural }}/status,verbs=get;update;patch
+//+kubebuilder:rbac:groups={{ .Primary.APIGroup }},resources={{ .Primary.KindPlural }}/finalizers,verbs=update
+//+kubebuilder:rbac:groups={{ .Secondary.APIGroup }},resources={{ .Secondary.KindPlural }},verbs=get;update;patch
+//+kubebuilder:rbac:groups={{ .Secondary.APIGroup }},resources={{ .Secondary.KindPlural }}/finalizers,verbs=update
 
-// Reconcile will ensure that the Kubernetes {{ .SecondaryKind }} for {{ .CRDKind }}
+// Reconcile will ensure that the Kubernetes {{ .Secondary.Kind }} for {{ .Primary.Kind }}
 // reaches the desired state.
-func (r *{{ .CRDKind }}{{ .SecondaryKind }}Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+func (r *{{ .Primary.Kind }}{{ .Secondary.Kind }}Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	l := log.FromContext(ctx)
-	l.Info("{{ .SecondaryKindLower }} reconciliation initiated.")
-	defer l.Info("{{ .SecondaryKindLower }} reconciliation complete.")
+	l.Info("{{ .Secondary.KindLower }} reconciliation initiated.")
+	defer l.Info("{{ .Secondary.KindLower }} reconciliation complete.")
 	instanceKey := req.NamespacedName
 
-	// Get the {{ .CRDKind }} instance to make sure it still exists.
-	var instance {{ .CRDAPIImportAlias }}.{{ .CRDKind }}
+	// Get the {{ .Primary.Kind }} instance to make sure it still exists.
+	var instance {{ .Primary.APIImportAlias }}.{{ .Primary.Kind }}
 	err := r.Client.Get(ctx, instanceKey, &instance)
 
 	if apierrors.IsNotFound(err) {
@@ -64,7 +64,7 @@ func (r *{{ .CRDKind }}{{ .SecondaryKind }}Reconciler) Reconcile(ctx context.Con
 		return subrec.Evaluate(subrec.RequeueWithError(err))
 	}
 
-	new := {{ .SecondaryAPIImportAlias }}.{{ .SecondaryKind }}{
+	new := {{ .Secondary.APIImportAlias }}.{{ .Secondary.Kind }}{
 		// TODO() Fill in your secondary resource spec here!
 	}
 
@@ -73,8 +73,8 @@ func (r *{{ .CRDKind }}{{ .SecondaryKind }}Reconciler) Reconcile(ctx context.Con
 		return subrec.Evaluate(subrec.RequeueWithError(err))
 	}
 
-	// If the {{ .SecondaryKindLower }} exists, get it and patch it
-	var existing {{ .SecondaryAPIImportAlias }}.{{ .SecondaryKind }}
+	// If the {{ .Secondary.KindLower }} exists, get it and patch it
+	var existing {{ .Secondary.APIImportAlias }}.{{ .Secondary.Kind }}
 	err = r.Client.Get(ctx, client.ObjectKeyFromObject(&new), &existing)
 
 	if apierrors.IsNotFound(err) {
@@ -103,10 +103,10 @@ func (r *{{ .CRDKind }}{{ .SecondaryKind }}Reconciler) Reconcile(ctx context.Con
 }
 
 // SetupWithManager sets up the controller with the Manager.
-func (r *{{ .CRDKind }}{{ .SecondaryKind }}Reconciler) SetupWithManager(mgr ctrl.Manager) error {
+func (r *{{ .Primary.Kind }}{{ .Secondary.Kind }}Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&{{ .CRDAPIImportAlias }}.{{ .CRDKind }}{}).
-		Owns(&{{ .SecondaryAPIImportAlias }}.{{ .SecondaryKind }}{}).
+		For(&{{ .Primary.APIImportAlias }}.{{ .Primary.Kind }}{}).
+		Owns(&{{ .Secondary.APIImportAlias }}.{{ .Secondary.Kind }}{}).
 		Complete(r)
 }
 `

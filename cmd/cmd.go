@@ -17,29 +17,34 @@ limitations under the License.
 package cmd
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"text/template"
 
+	"github.com/opdev/controller-stamp/resource"
 	ct "github.com/opdev/controller-stamp/template"
 )
 
 // Execute is the primary entrypoint.
 func Execute() int {
-	i := ct.Input{
-		CRDAPIImportAlias:         "demooperatorv1alpha1",
-		CRDAPIImportPath:          "example.com/demo-operator/api/v1alpha1",
-		CRDAPIGroup:               "demo.example.com",
-		CRDKind:                   "MyCustomResource",
-		CRDKindLower:              "mycustomresource",
-		CRDResourcePlural:         "mycustomresources",
-		SecondaryAPIImportPath:    "k8s.io/api/apps/v1",
-		SecondaryAPIImportAlias:   "appsv1",
-		SecondaryKind:             "Deployment",
-		SecondaryKindLower:        "deployment",
-		SecondaryResourceAPIGroup: "apps",
-		SecondaryResourcePlural:   "deployments",
+	secondary, err := resource.Get("depsloment")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "ERR %s: %s", err, "falling back to a pod as the secondary resource.")
+		secondary, _ = resource.Get("pod")
 	}
+
+	i := ct.Input{
+		Primary: ct.ResourceData{
+			APIImportAlias: "demooperatorv1alpha1",
+			APIImportPath:  "example.com/demo-operator/api/v1alpha1",
+			APIGroup:       "demo.example.com",
+			Kind:           "MyCustomResource",
+		},
+		Secondary: secondary,
+	}
+
+	i.Introspect()
 
 	toRender, err := template.New("controller").Parse(ct.StandardControllerTemplate)
 	if err != nil {

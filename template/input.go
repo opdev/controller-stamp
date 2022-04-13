@@ -16,17 +16,59 @@ limitations under the License.
 
 package template
 
+import (
+	"strings"
+
+	pluralize "github.com/gertd/go-pluralize"
+)
+
 type Input struct {
-	CRDAPIImportAlias         string // demooperatorv1alpha1
-	CRDAPIImportPath          string // example.com/demo-operator/api/v1alpha1
-	CRDKind                   string // MyCustomResource - should be camel
-	CRDKindLower              string // mycustomresource - use a funcmap
-	CRDAPIGroup               string // e.g. demo.example.com
-	CRDResourcePlural         string // mycustomresources
-	SecondaryAPIImportPath    string // k8s.io/api/apps/v1
-	SecondaryAPIImportAlias   string // appsv1
-	SecondaryKind             string // Deployment - should be camel
-	SecondaryKindLower        string // deployment - use a funcmap to get this from other values
-	SecondaryResourceAPIGroup string // apps
-	SecondaryResourcePlural   string // deployments
+	Primary   ResourceData
+	Secondary ResourceData
+}
+
+// Introspect will fill in keys that can be filled in
+// based on already provided values. Values that can
+// be introspected are commented with "Introspectable".
+func (i *Input) Introspect() {
+	// Only introspect the lower if it's empty.
+	if len(i.Primary.KindLower) == 0 {
+		i.Primary.KindLower = strings.ToLower(i.Primary.Kind)
+	}
+
+	if len(i.Secondary.KindLower) == 0 {
+		i.Secondary.KindLower = strings.ToLower(i.Secondary.Kind)
+	}
+
+	// Only introspect the plural if it's empty.
+	if len(i.Primary.KindPlural) == 0 {
+		i.Primary.KindPlural = pluralize.NewClient().Plural(i.Primary.KindLower)
+	}
+
+	if len(i.Secondary.KindPlural) == 0 {
+		i.Secondary.KindPlural = pluralize.NewClient().Plural(i.Secondary.KindLower)
+	}
+}
+
+type ResourceData struct {
+	// The package where your API exists
+	// e.g. example.com/demo/api/v1alpha1
+	APIImportPath string
+	// The import alias to use for your API import.
+	// e.g. demov1alpha1
+	APIImportAlias string
+	// Your kind's APIGroup. No version.
+	// e.g. demo.example.com
+	APIGroup string
+	// The title-cased string representation of your kind.
+	// e.g. MyApp
+	Kind string
+	// The lower-case string representation of your kind.
+	// Introspectable.
+	// e.g. myapp.
+	KindLower string
+	// The lower-case and plural string representation of your kind.
+	// Introspectable.
+	// e.g. myapps
+	KindPlural string
 }
