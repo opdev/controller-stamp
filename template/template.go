@@ -8,6 +8,8 @@ func Get(tmpl string) (string, error) {
 		return StandardController, nil
 	case "StandardControllerWithSubreconcilers":
 		return StandardControllerWithSubreconcilers, nil
+	case "SubreconcilerControllerWithBaseManifests":
+		return SubreconcilerControllerWithBaseManifests, nil
 	default:
 		return StandardController, fmt.Errorf(
 			"Yo! The template \"%s\" is not one I recognize.",
