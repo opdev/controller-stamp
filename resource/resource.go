@@ -34,6 +34,10 @@ func Get(resource string) (template.ResourceData, error) {
 		return configmap, nil
 	case "persistentvolumeclaim", "pvc":
 		return pvc, nil
+	case "job":
+		return job, nil
+	case "cronjob":
+		return cronjob, nil
 	default:
 		return pod, fmt.Errorf(
 			"woah there! I've got no clue what a \"%s\" resource is, pal",
@@ -85,4 +89,22 @@ var pvc = template.ResourceData{
 	Kind:           "PersistentVolumeClaim",
 	KindLower:      "persistentvolumeclaim",
 	KindPlural:     "persistentvolumeclaims",
+}
+
+var job = template.ResourceData{
+	APIImportPath:  "k8s.io/api/batch/v1",
+	APIImportAlias: "batchv1",
+	APIGroup:       "batch",
+	Kind:           "Job",
+	KindLower:      "job",
+	KindPlural:     "jobs",
+}
+
+var cronjob = template.ResourceData{
+	APIImportPath:  "k8s.io/api/batch/v1",
+	APIImportAlias: "batchv1",
+	APIGroup:       "batch",
+	Kind:           "CronJob",
+	KindLower:      "cronjob",
+	KindPlural:     "cronjobs",
 }
