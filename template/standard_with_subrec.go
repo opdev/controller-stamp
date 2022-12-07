@@ -90,7 +90,7 @@ func (r *{{ .Primary.Kind }}{{ .Secondary.Kind }}Reconciler) Reconcile(ctx conte
 	}
 
 	l.Info("updating resources if necessary", existing.Kind, existing.GetName())
-	patchDiff := client.MergeFrom(&existing)
+	patchDiff := client.MergeFrom(existing.DeepCopy())
 	if err = mergo.Merge(&existing, new, mergo.WithOverride); err != nil {
 		return subrec.Evaluate(subrec.RequeueWithError(err))
 	}
