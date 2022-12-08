@@ -44,7 +44,7 @@ type {{ .Primary.Kind }}{{ .Secondary.Kind }}Reconciler struct {
 //+kubebuilder:rbac:groups={{ .Primary.APIGroup }},resources={{ .Primary.KindPlural }},verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups={{ .Primary.APIGroup }},resources={{ .Primary.KindPlural }}/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups={{ .Primary.APIGroup }},resources={{ .Primary.KindPlural }}/finalizers,verbs=update
-//+kubebuilder:rbac:groups={{ .Secondary.APIGroup }},resources={{ .Secondary.KindPlural }},verbs=get;update;patch
+//+kubebuilder:rbac:groups={{ .Secondary.APIGroup }},resources={{ .Secondary.KindPlural }},verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups={{ .Secondary.APIGroup }},resources={{ .Secondary.KindPlural }}/finalizers,verbs=update
 
 // Reconcile will ensure that the Kubernetes {{ .Secondary.Kind }} for {{ .Primary.Kind }}
